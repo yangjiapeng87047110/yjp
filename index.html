@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="js/jquery-3.1.1.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<select id="c1"></select>
+		<select id="c2"></select>
+		<button id="c3">搜索</button>
+		<div id="c4"></div>
+		<table border="1" id="c5">
+			<tr>
+				<th>点击</th>
+				<th>日期</th>
+				<th>天气情况</th>
+			</tr>
+		</table>
+		<div id="c6" style="color:salmon; border: 1px solid #000; width: 300px; height: 250px;">
+			
+		</div>
+	</body>
+	<script type="text/javascript">
+		$(function(){
+			var $data = null;
+			var $datas = null;
+			$.ajax({
+				type:"get",
+				url:"js/city.json",
+				async:true,
+				dataType:"json",
+				success:function(a){
+//					console.log(a);
+					$data=a;
+//					console.log($data);
+					$.each($data.citylist,function(i,v){
+//						console.log(v);
+						$d = v.p;
+//						console.log($d);
+						$("#c1").append("<option>"+$d+"</option>");
+					});
+				}
+			});
+			$("#c1").change(function(){
+				$a = $("#c1").val();
+				$("#c2").html("");
+//				console.log($a);
+				$.each($data.citylist,function(i,v) {
+//					console.log(v);
+					if($a==v.p){
+						$.each(v.c, function(i,v) {
+//							console.log(v);
+							$("#c2").append("<option>"+v.n+"</opyion>");
+						});
+					}
+				});
+			})
+			$("#c3").click(function(){
+				$al = $("#c2").val();
+				$("#c5").html("");
+				$("#c6").html("");
+				$.ajax({
+					type:"get",
+					url:"http://wthrcdn.etouch.cn/weather_mini?city=" + $al,
+					async:true,
+					dataType:"jsonp",
+					success:function(a){
+//						console.log(a);
+						$datas = a.data.forecast;
+						$a = a.data;
+//						console.log($a);
+						$s="<p>"+$a.city+"最近五天的天气情况"+"</p>";
+						$("#c4").html($s);
+						$.each($a.forecast, function(i,v) {
+//							console.log(v);
+							$("#c5").append("<tr><td><input type='checkbox'></td><td>"+v.date+"</td><td>"+v.type+"</td></tr>");
+						});
+					}
+				});
+			})
+			$("#c5").on('click','tr',function(){
+//				alert("aaaa");
+				$.each($("#c5").find("tr"), function() {
+					$(this).find(":checkbox").prop("checked",false);
+				});
+				$as=$(this).find(":checkbox").prop("checked",true);
+				console.log($as);
+				var box = $(this).index();
+				var check =$datas[box];
+				var ayy = "";
+				ayy+="<p>"+check.date+"的天气情况"+"</p>";
+				ayy+="<p>"+check.fengxiang+"</p>";
+				ayy+="<p>"+check.fengli+"</p>";
+				ayy+="<p>"+check.high+"</p>";
+				ayy+="<p>"+check.low+"</p>";
+				ayy+="<p>"+check.type+"</p>";
+				$("#c6").html(ayy);
+			})
+		})
+	</script>
+</html>
